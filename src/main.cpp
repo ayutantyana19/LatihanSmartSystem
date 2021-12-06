@@ -1,47 +1,58 @@
 #include <main.h>
 
+uint8_t jalan[4][3] = {
+  {11, 12, 13}, //timur
+  {8, 9, 10}, //barat
+  {5, 6, 7}, //selatan
+  {2, 3, 4} //utara
+};
 
-void setup() {
-  // put your setup code here, to run once:
-  pinMode(A0, INPUT);
+uint8_t durasiHatiHati = 1;
+uint8_t durasiJalan = 5;
+
+void setup()
+{
   Serial.begin(9600);
+  for (auto &&arah : jalan){for (auto &&lampu : arah){pinMode(lampu, OUTPUT);}}
 }
 
-void loop() {
-  int sinyalOutputTerkonversi = analogRead(A0);
+void loop()
+{
+  for(uint8_t arah = 0; arah < 4; arah++)
+  {
+    go(arah);
+  }
+}
 
-  //5 karena tegangan kerja dari Uno adalah 5volt,
-  //1023 karena rentang ADC beresolusi 10bit, adalah dari 0 - 1023
-  float sinyalOutput = (sinyalOutputTerkonversi/1023.0) * 5000;
+void go(uint8_t arah)
+{
+  for(uint8_t index = 0; index < 4; index++)
+  {
+      digitalWrite(jalan[index][MERAH], HIGH);
+      digitalWrite(jalan[index][KUNING], LOW);
+      digitalWrite(jalan[index][HIJAU], LOW);
+  }
 
-  // LM35 Linier Tarnsfer Function
-  // S = B + (MP)
-  // S = sinyal putput (mV)
-  // B = offset ketika nilai pembacaan 0, menurut pabrik, itu adalah 0
-  // M = Slope linier, dalam hal sensor LM35, menurut pabrik, itu adalah 10mV
-  // P = Data lingkungan (Celcius)
-  // P = B + (S / M)
-  // P = B / (S + M)
-  // P = S / B + M
+  digitalWrite(jalan[arah][MERAH], LOW);
+  digitalWrite(jalan[arah][KUNING], HIGH);
 
-  //10(S) = 7(B) + 3(MP)
-  //3(MP) = 10(S) - 7(B)
-  // S = B + (MP)
-  // (MP) = S - B
-  // (M x P) = S
-  // P = S / M
-
-  float celcius = (sinyalOutput / 10.0);
-
-  Serial.print(sinyalOutput);
-  Serial.print(" mV");
-  Serial.print(" - ");
-  Serial.print(sinyalOutputTerkonversi);
-  Serial.print(" ADC");
-  Serial.print(" - ");
-  Serial.print(celcius);
-  Serial.println(" Celcius");
-
-
-  delay(100);
+  uint16_t millisDulu = millis();
+  while(true)
+  {
+    uint16_t durasi = millis() - millisDulu;
+    if(durasi == (durasiHatiHati) * (uint16_t)1000)
+    {
+      digitalWrite(jalan[arah][KUNING], LOW);
+      digitalWrite(jalan[arah][HIJAU], HIGH);
+    }
+    else if(durasi == (durasiHatiHati+durasiJalan) * (uint16_t)1000)
+    {
+      digitalWrite(jalan[arah][HIJAU], LOW);
+      digitalWrite(jalan[arah][KUNING], HIGH);
+    }
+    else if(durasi == (durasiHatiHati+durasiJalan+durasiHatiHati) * (uint16_t)1000)
+    {
+      break;
+    }
+  }
 }
