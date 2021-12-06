@@ -12,16 +12,12 @@ uint8_t durasiJalan = 5;
 
 void setup()
 {
-  Serial.begin(9600);
   for (auto &&arah : jalan){for (auto &&lampu : arah){pinMode(lampu, OUTPUT);}}
 }
 
 void loop()
 {
-  for(uint8_t arah = 0; arah < 4; arah++)
-  {
-    go(arah);
-  }
+  for(uint8_t arah = 0; arah < 4; arah++){go(arah);}
 }
 
 void go(uint8_t arah)
